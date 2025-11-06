@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Laravel
+backend/.env
+backend/storage/
+backend/bootstrap/cache/
+backend/public/hot
+backend/public/storage
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/.env*.local
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.log

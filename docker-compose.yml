@@ -1,0 +1,78 @@
+version: "3.8"
+
+services:
+  # --- Service MySQL ---
+  mysql:
+    image: mysql:8.0
+    container_name: crud_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: laravel_db
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: laravel_user
+      MYSQL_PASSWORD: laravel_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - crud_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --- Service Laravel API ---
+  laravel:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: crud_laravel
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./backend:/var/www
+    ports:
+      - "8000:8000"
+    networks:
+      - crud_network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: laravel_db
+      DB_USERNAME: laravel_user
+      DB_PASSWORD: laravel_password
+
+  # --- Service Next.js Frontend ---
+  nextjs:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: crud_nextjs
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    networks:
+      - crud_network
+    depends_on:
+      - laravel
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api
+
+# --- Réseaux & volumes ---
+networks:
+  crud_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
