@@ -52,7 +52,7 @@ class HotelController extends Controller
         // Tri
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
-        
+
         // Validation des champs de tri autorisés
         $allowedSortFields = ['name', 'city', 'price_per_night', 'max_capacity', 'created_at'];
         if (in_array($sortBy, $allowedSortFields)) {
@@ -80,18 +80,28 @@ class HotelController extends Controller
     /**
      * Affiche un hôtel spécifique avec ses photos.
      */
-    public function show(Hotel $hotel): JsonResponse
+    public function show($id): JsonResponse
     {
-        $hotel->load('pictures');
-        
+        $hotel = Hotel::with('pictures')->find($id);
+
+        if (!$hotel) {
+            return $this->errorResponse('L\'hôtel n\'existe pas', null, 404);
+        }
+
         return $this->successResponse($hotel, 'Détails de l\'hôtel récupérés avec succès');
     }
 
     /**
      * Met à jour un hôtel existant.
      */
-    public function update(HotelRequest $request, Hotel $hotel): JsonResponse
+    public function update(HotelRequest $request, $id): JsonResponse
     {
+        $hotel = Hotel::find($id);
+
+        if (!$hotel) {
+            return $this->errorResponse('L\'hôtel n\'existe pas', null, 404);
+        }
+
         $hotel->update($request->validated());
         $hotel->load('pictures');
 
@@ -101,8 +111,14 @@ class HotelController extends Controller
     /**
      * Supprime un hôtel.
      */
-    public function destroy(Hotel $hotel): JsonResponse
+    public function destroy($id): JsonResponse
     {
+        $hotel = Hotel::find($id);
+
+        if (!$hotel) {
+            return $this->errorResponse('L\'hôtel n\'existe pas', null, 404);
+        }
+
         $hotelName = $hotel->name;
         $hotel->delete();
 
@@ -115,13 +131,13 @@ class HotelController extends Controller
     public function search(Request $request): JsonResponse
     {
         $search = $request->get('q', '');
-        
+
         if (empty($search)) {
             return $this->errorResponse('Le paramètre de recherche "q" est requis', null, 400);
         }
 
         $hotels = Hotel::with('pictures')
-            ->where(function($query) use ($search) {
+            ->where(function ($query) use ($search) {
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhere('city', 'like', "%{$search}%")
                     ->orWhere('country', 'like', "%{$search}%")
