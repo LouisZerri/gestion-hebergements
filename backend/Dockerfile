@@ -1,10 +1,6 @@
 FROM php:8.3-fpm
 
-# Arguments
-ARG user=laravel
-ARG uid=1000
-
-# Install system dependencies
+# Installation des dépendances système
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -12,41 +8,35 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     zip \
-    unzip \
-    libzip-dev \
-    libjpeg-dev \
-    libfreetype6-dev
+    unzip
 
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+# Installation des extensions PHP
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# Configure and install GD with JPEG support
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
-
-# Get latest Composer
+# Installation de Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Create system user to run Composer and Artisan Commands
-RUN useradd -G www-data,root -u $uid -d /home/$user $user
-RUN mkdir -p /home/$user/.composer && \
-    chown -R $user:$user /home/$user
+# Créer un utilisateur non-root avec le même UID/GID que l'hôte
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+RUN groupadd -g ${GROUP_ID} laravel && \
+    useradd -u ${USER_ID} -g laravel -m -s /bin/bash laravel
 
-# Set working directory
+# Définir le répertoire de travail
 WORKDIR /var/www
 
-# Copy existing application directory
-COPY . /var/www
+# Copier les fichiers
+COPY --chown=laravel:laravel . .
 
-# Copy existing application directory permissions
-RUN chown -R $user:$user /var/www
+# Définir les permissions
+RUN chown -R laravel:laravel /var/www && \
+    chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-# Change current user to $user
-USER $user
+# Utiliser l'utilisateur laravel
+USER laravel
 
-# Expose port 8000 and start php-fpm server
+# Exposer le port
 EXPOSE 8000
 
+# Démarrer le serveur Laravel
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

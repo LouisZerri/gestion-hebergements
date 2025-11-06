@@ -20,10 +20,12 @@ backend/
 │   │   ├── Controllers/Api/
 │   │   │   ├── HotelController.php
 │   │   │   └── HotelPictureController.php
+│   │   ├── Middleware/
+│   │   │   └── ForceJsonResponse.php
 │   │   └── Requests/
 │   │       └── HotelRequest.php     # Validation
 │   ├── Models/
-│   │   ├── Hotel.php
+│   │   ├── Hotel.php                # Avec suppression fichiers
 │   │   └── HotelPicture.php
 │   └── Traits/
 │       └── ApiResponse.php          # Réponses standardisées
@@ -49,9 +51,18 @@ backend/
 ```
 
 ## 🚀 Installation
+
+### Prérequis
+- Docker & Docker Compose
+
+### Étapes
 ```bash
 # Depuis la racine du projet
 docker-compose up -d --build
+
+# Attendre que MySQL soit prêt (30-60 secondes)
+docker-compose logs -f mysql
+# Attendre le message "ready for connections"
 
 # Entrer dans le conteneur
 docker-compose exec laravel bash
@@ -61,7 +72,13 @@ composer install
 
 # Configuration
 php artisan key:generate
+
+# Créer le lien symbolique pour le storage
 php artisan storage:link
+
+# Configurer les permissions pour l'upload de fichiers
+chmod -R 775 storage
+chmod -R 775 public/storage
 
 # Migrations et seeders
 php artisan migrate
@@ -69,6 +86,8 @@ php artisan db:seed
 
 exit
 ```
+
+**L'API est maintenant accessible sur : http://localhost:8000**
 
 ## 📡 Endpoints API
 
@@ -198,9 +217,15 @@ Toutes les réponses suivent une structure cohérente :
 
 **Fonctionnalités :**
 - ✅ Upload multiple
-- ✅ Gestion des positions
-- ✅ Suppression en cascade (hôtel → photos)
-- ✅ Suppression automatique des fichiers
+- ✅ Gestion des positions (ordre d'affichage)
+- ✅ Suppression en cascade (hôtel → photos BDD + fichiers)
+- ✅ Suppression automatique des fichiers physiques
+- ✅ Nettoyage des dossiers vides
+
+**Détails de suppression :**
+- Supprimer un hôtel → supprime toutes ses photos (BDD + fichiers)
+- Supprimer une photo → supprime l'enregistrement BDD + le fichier physique
+- Les dossiers vides sont automatiquement nettoyés
 
 ## 🧪 Tests
 
@@ -261,7 +286,7 @@ exit
 **Intégrité :**
 - ✅ Données insérées correctement
 - ✅ Mises à jour fonctionnelles
-- ✅ Suppression en cascade
+- ✅ Suppression en cascade (BDD + fichiers)
 
 **Sécurité :**
 - ✅ Impossible de modifier les ressources d'un autre hôtel
@@ -279,6 +304,10 @@ exit
 - filesize, position
 - created_at, updated_at
 
+**Suppression en cascade :** 
+- Supprimer un hôtel supprime automatiquement ses photos en BDD
+- Le modèle Hotel utilise un événement `deleting` pour supprimer les fichiers physiques
+
 ## 🌐 CORS
 
 Autorise les requêtes depuis :
@@ -287,7 +316,7 @@ Autorise les requêtes depuis :
 
 Configuration : `config/cors.php`
 
-## 🛠️ Commandes Artisan
+## 🛠️ Commandes Artisan Utiles
 ```bash
 # Migrations
 php artisan migrate
@@ -295,6 +324,10 @@ php artisan migrate:fresh --seed
 
 # Storage
 php artisan storage:link
+
+# Permissions
+chmod -R 775 storage
+chmod -R 775 public/storage
 
 # Cache
 php artisan cache:clear
@@ -309,9 +342,10 @@ php artisan route:list
 
 - **Seeder** : 10 hôtels de test sans photos
 - **Upload** : Via API ou frontend uniquement
-- **Cascade** : Suppression hôtel → supprime photos (BDD + fichiers)
+- **Cascade** : Suppression hôtel → supprime photos (BDD + fichiers physiques)
 - **Messages** : Tous en français
-- **Tests** : MySQL en mémoire pour rapidité
+- **Tests** : Base de données en mémoire pour rapidité
+- **Permissions** : Les permissions storage sont critiques pour l'upload
 
 ## 🚨 Troubleshooting
 
@@ -326,9 +360,24 @@ docker-compose logs mysql
 php artisan storage:link
 ```
 
-### Erreur de permissions
+### Erreur 403 sur les images
 ```bash
-chmod -R 775 storage bootstrap/cache
+chmod -R 775 storage
+chmod -R 775 public/storage
+```
+
+### Photos non supprimées
+```bash
+# Vérifier les permissions
+ls -la storage/app/public/hotels/
+chmod -R 775 storage/app/public/hotels/
+```
+
+### Réinitialiser complètement
+```bash
+docker-compose down -v
+docker-compose up -d --build
+# Puis refaire l'installation complète
 ```
 
 ## 📄 Licence
