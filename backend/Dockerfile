@@ -29,7 +29,8 @@ WORKDIR /var/www
 COPY --chown=laravel:laravel . .
 
 # Définir les permissions
-RUN chown -R laravel:laravel /var/www && \
+RUN mkdir -p /var/www/storage /var/www/bootstrap/cache && \
+    chown -R laravel:laravel /var/www && \
     chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
 # Utiliser l'utilisateur laravel
