@@ -45,9 +45,16 @@ docker-compose exec laravel php artisan storage:link
 # 5. Lancer les migrations et seeds
 docker-compose exec laravel php artisan migrate --seed
 
+# 6. Entrer dans le conteneur
+docker-compose exec laravel bash
+
+# 7. Configurer les permissions pour l'upload de fichiers
+chmod -R 775 storage
+chmod -R 775 public/storage
+
 # 6. Accéder à l'application
 Frontend : http://localhost:3000
-Backend  : http://localhost:8000
+Backend  : http://localhost:8000/api
 ```
 
 ## 📁 Structure du Projet
