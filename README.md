@@ -41,7 +41,6 @@ docker-compose up -d --build
 docker-compose exec laravel bash
 
 # 5. Configurer Laravel
-composer install
 php artisan key:generate
 php artisan storage:link
 
