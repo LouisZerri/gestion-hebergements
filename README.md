@@ -37,20 +37,23 @@ docker-compose up -d --build
 
 # 3. Attendre 30 secondes que MySQL démarre
 
-# 4. Configurer Laravel
-docker-compose exec laravel composer install
-docker-compose exec laravel php artisan key:generate
-docker-compose exec laravel php artisan storage:link
-
-# 5. Lancer les migrations et seeds
-docker-compose exec laravel php artisan migrate --seed
-
-# 6. Entrer dans le conteneur
+# 4. Entrer dans le conteneur
 docker-compose exec laravel bash
 
-# 7. Configurer les permissions pour l'upload de fichiers
+# 5. Configurer Laravel
+composer install
+php artisan key:generate
+php artisan storage:link
+
+# 5. Lancer les migrations et seeds
+php artisan migrate --seed
+
+# 6. Configurer les permissions pour l'upload de fichiers
 chmod -R 775 storage
 chmod -R 775 public/storage
+
+# 7. Sortir du conteneur
+exit
 
 # 8. Accéder à l'application
 Frontend : http://localhost:3000
