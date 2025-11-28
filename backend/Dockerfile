@@ -28,9 +28,6 @@ WORKDIR /var/www
 # Copier les fichiers
 COPY --chown=laravel:laravel . .
 
-# Installer les dépendances Composer
-RUN composer install --no-dev --optimize-autoloader
-
 # Définir les permissions
 RUN mkdir -p /var/www/storage /var/www/bootstrap/cache && \
     chown -R laravel:laravel /var/www && \
@@ -42,5 +39,5 @@ USER laravel
 # Exposer le port
 EXPOSE 8000
 
-# Démarrer le serveur Laravel
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+# Garder le container actif avec tail -f (ou sleep infinity)
+CMD ["tail", "-f", "/dev/null"]
