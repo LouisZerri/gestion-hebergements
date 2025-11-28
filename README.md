@@ -52,7 +52,7 @@ docker-compose exec laravel bash
 chmod -R 775 storage
 chmod -R 775 public/storage
 
-# 6. Accéder à l'application
+# 8. Accéder à l'application
 Frontend : http://localhost:3000
 Backend  : http://localhost:8000/api
 ```
