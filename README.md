@@ -42,24 +42,10 @@ docker-compose exec laravel composer install
 docker-compose exec laravel php artisan key:generate
 docker-compose exec laravel php artisan storage:link
 
-# 5. Configurer les variables d'environnement
-Modifier le fichier backend/.env avec les informations suivantes :
-
-APP_LOCALE=fr
-APP_FALLBACK_LOCALE=fr
-APP_FAKER_LOCALE=fr_FR
-
-DB_CONNECTION=mysql
-DB_HOST=mysql
-DB_PORT=3306
-DB_DATABASE=laravel_db
-DB_USERNAME=laravel_user
-DB_PASSWORD=laravel_password
-
-# 6. Lancer les migrations et seeds
+# 5. Lancer les migrations et seeds
 docker-compose exec laravel php artisan migrate --seed
 
-# 7. Accéder à l'application
+# 6. Accéder à l'application
 Frontend : http://localhost:3000
 Backend  : http://localhost:8000
 ```
