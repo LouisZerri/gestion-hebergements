@@ -56,7 +56,7 @@ exit
 
 # 8. Accéder à l'application
 Frontend : http://localhost:3000
-Backend  : http://localhost:8000/api
+Backend  : http://localhost:8000/api/hotels
 ```
 
 ## 📁 Structure du Projet
