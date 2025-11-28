@@ -28,6 +28,9 @@ WORKDIR /var/www
 # Copier les fichiers
 COPY --chown=laravel:laravel . .
 
+# Installer les dépendances Composer
+RUN composer install --no-dev --optimize-autoloader
+
 # Définir les permissions
 RUN mkdir -p /var/www/storage /var/www/bootstrap/cache && \
     chown -R laravel:laravel /var/www && \
