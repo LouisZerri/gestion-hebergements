@@ -25,19 +25,11 @@ RUN groupadd -g ${GROUP_ID} laravel && \
 # Définir le répertoire de travail
 WORKDIR /var/www
 
-# Copier les fichiers
-COPY --chown=laravel:laravel . .
-
-# Définir les permissions
-RUN mkdir -p /var/www/storage /var/www/bootstrap/cache && \
-    chown -R laravel:laravel /var/www && \
-    chmod -R 775 /var/www/storage /var/www/bootstrap/cache
-
-# Utiliser l'utilisateur laravel
-USER laravel
+# Copier l'entrypoint
+COPY docker/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Exposer le port
 EXPOSE 8000
 
-# Garder le container actif avec tail -f (ou sleep infinity)
-CMD ["tail", "-f", "/dev/null"]
+ENTRYPOINT ["docker-entrypoint.sh"]
